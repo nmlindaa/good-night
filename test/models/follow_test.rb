@@ -8,13 +8,13 @@ RSpec.describe Follow, type: :model do
     it "belongs to a follower" do
       association = described_class.reflect_on_association(:follower)
       expect(association.macro).to eq :belongs_to
-      expect(association.class_name).to eq 'User'
+      expect(association.class_name).to eq "User"
     end
 
     it "belongs to a followed user" do
       association = described_class.reflect_on_association(:followed)
       expect(association.macro).to eq :belongs_to
-      expect(association.class_name).to eq 'User'
+      expect(association.class_name).to eq "User"
     end
   end
 
