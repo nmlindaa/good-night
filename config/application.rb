@@ -27,6 +27,8 @@ module GoodNight
     # set UUID as the default primary key type
     config.generators do |g|
       g.orm :active_record, primary_key_type: :uuid
+      g.test_framework :rspec, fixture: false
+      g.fixture_replacement :factory_bot, dir: "spec/factories"
     end
   end
 end
