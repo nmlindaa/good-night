@@ -1,0 +1,7 @@
+user_one:
+  id: <%= SecureRandom.uuid %>
+  name: John Doe
+
+user_two:
+  id: <%= SecureRandom.uuid %>
+  name: Jane Smith
