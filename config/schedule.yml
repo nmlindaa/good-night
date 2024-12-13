@@ -1,0 +1,3 @@
+refresh_weekly_sleep_records_summary:
+  cron: "0 * * * *"
+  class: "RefreshWeeklySleepRecordsSummaryJob"
