@@ -9,8 +9,8 @@ module Api
       def index
         sleep_records = @user.sleep_records
                               .order(created_at: :desc)
-                              .page(params[:page])
-                              .per(10)
+                              .page(params[:page] || 1)
+                              .per(params[:per_page] || 10)
         render json: sleep_records, meta: { total_pages: sleep_records.total_pages }, status: :ok
       end
 
