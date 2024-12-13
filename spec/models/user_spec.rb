@@ -16,7 +16,12 @@ RSpec.describe User, type: :model do
     end
 
     it "has many following" do
-      user = User.reflect_on_association(:following)
+      user = User.reflect_on_association(:followings)
+      expect(user.macro).to eq(:has_many)
+    end
+
+    it "has many sleep_records" do
+      user = User.reflect_on_association(:sleep_records)
       expect(user.macro).to eq(:has_many)
     end
   end
