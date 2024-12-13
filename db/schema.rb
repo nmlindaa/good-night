@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_12_12_165532) do
+ActiveRecord::Schema[8.0].define(version: 2024_12_12_184714) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -23,6 +23,16 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_12_165532) do
     t.index ["follower_id", "followed_id"], name: "index_follows_on_follower_id_and_followed_id", unique: true
   end
 
+  create_table "sleep_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id"
+    t.datetime "bed_time", null: false
+    t.datetime "wake_time"
+    t.integer "duration_minutes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bed_time", "duration_minutes"], name: "index_sleep_records_on_bed_time_and_duration_minutes"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -31,4 +41,5 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_12_165532) do
 
   add_foreign_key "follows", "users", column: "followed_id"
   add_foreign_key "follows", "users", column: "follower_id"
+  add_foreign_key "sleep_records", "users"
 end
