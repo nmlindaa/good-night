@@ -16,6 +16,15 @@ Rails.application.routes.draw do
     namespace :v1 do
       post "follows", to: "follows#create"
       delete "follows", to: "follows#destroy"
+
+      resources :users, only: [] do
+        resources :sleep_records, only: [ :index ] do
+          collection do
+            post :clock_in
+            put :clock_out
+          end
+        end
+      end
     end
   end
 end
