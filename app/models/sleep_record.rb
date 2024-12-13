@@ -9,6 +9,17 @@ class SleepRecord < ApplicationRecord
   before_save :calculate_duration, if: :wake_time_changed?
   before_update :prevent_updates_after_wake_time_set
 
+  scope :open, -> { where(wake_time: nil) }
+  scope :closed, -> { where.not(wake_time: nil) }
+
+  def open?
+    wake_time.nil?
+  end
+
+  def closed?
+    !open?
+  end
+
   def self.clock_in(user)
     return false if user.sleep_records.where(wake_time: nil).exists?
 

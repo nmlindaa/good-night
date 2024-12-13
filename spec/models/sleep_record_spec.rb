@@ -107,6 +107,61 @@ RSpec.describe SleepRecord, type: :model do
     end
   end
 
+  describe "scopes" do
+    let(:user_2) { create(:user) }
+    let!(:open_record) { create(:sleep_record, user: user_2, bed_time: 1.hour.ago) }
+
+    let!(:closed_record) do
+      Timecop.freeze(2.hours.from_now) do
+        create(:sleep_record, user: user, bed_time: 1.hour.ago, wake_time: Time.current)
+      end
+    end
+
+    describe ".open" do
+      it "returns only open sleep records" do
+        expect(SleepRecord.open).to include(open_record)
+        expect(SleepRecord.open).not_to include(closed_record)
+      end
+    end
+
+    describe ".closed" do
+      it "returns only closed sleep records" do
+        expect(SleepRecord.closed).to include(closed_record)
+        expect(SleepRecord.closed).not_to include(open_record)
+      end
+    end
+  end
+
+  describe "instance methods" do
+    describe "#open?" do
+      it "returns true for open sleep records" do
+        sleep_record = create(:sleep_record, bed_time: 1.hour.ago)
+        expect(sleep_record.open?).to be true
+      end
+
+      it "returns false for closed sleep records" do
+        Timecop.freeze(Time.current) do
+          sleep_record = create(:sleep_record, bed_time: 2.hours.ago, wake_time: 1.hour.ago)
+          expect(sleep_record.open?).to be false
+        end
+      end
+    end
+
+    describe "#closed?" do
+      it "returns false for open sleep records" do
+        sleep_record = create(:sleep_record, bed_time: 1.hour.ago)
+        expect(sleep_record.closed?).to be false
+      end
+
+      it "returns true for closed sleep records" do
+        Timecop.freeze(Time.current) do
+          sleep_record = create(:sleep_record, bed_time: 2.hours.ago, wake_time: 1.hour.ago)
+          expect(sleep_record.closed?).to be true
+        end
+      end
+    end
+  end
+
   describe "edge cases" do
     it "handles bed_time and wake_time in different time zones" do
       sleep_record = create(:sleep_record,
