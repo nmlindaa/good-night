@@ -3,6 +3,7 @@ require 'spec_helper'
 require 'shoulda/matchers'
 require 'support/factory_bot'
 require 'faker'
+require 'timecop'
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
 # Prevent database truncation if the environment is production
