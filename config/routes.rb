@@ -24,6 +24,7 @@ Rails.application.routes.draw do
             put :clock_out
           end
         end
+        resources :following_sleep_records, only: [ :index ], controller: "following_sleep_records"
       end
     end
   end
