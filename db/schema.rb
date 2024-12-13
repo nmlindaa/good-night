@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_12_12_184714) do
+ActiveRecord::Schema[8.0].define(version: 2024_12_13_184653) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -42,4 +42,19 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_12_184714) do
   add_foreign_key "follows", "users", column: "followed_id"
   add_foreign_key "follows", "users", column: "follower_id"
   add_foreign_key "sleep_records", "users"
+
+  create_view "weekly_sleep_records_summary", materialized: true, sql_definition: <<-SQL
+      SELECT sr.id,
+      sr.user_id,
+      f.follower_id,
+      sr.bed_time,
+      sr.wake_time,
+      sr.duration_minutes
+     FROM (sleep_records sr
+       JOIN follows f ON ((sr.user_id = f.followed_id)))
+    WHERE ((sr.bed_time >= (now() - 'P7D'::interval)) AND (sr.wake_time IS NOT NULL))
+    ORDER BY sr.duration_minutes DESC;
+  SQL
+  add_index "weekly_sleep_records_summary", ["follower_id", "user_id"], name: "index_weekly_sleep_records_summary"
+
 end
