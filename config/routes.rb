@@ -27,5 +27,11 @@ Rails.application.routes.draw do
         resources :following_sleep_records, only: [ :index ], controller: "following_sleep_records"
       end
     end
+
+    namespace :v2 do
+      resources :users, only: [] do
+        resources :following_sleep_records, only: [ :index ], controller: "following_sleep_records"
+      end
+    end
   end
 end
