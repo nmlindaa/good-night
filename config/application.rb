@@ -33,5 +33,7 @@ module GoodNight
 
     config.active_job.queue_adapter = :sidekiq
     config.autoload_paths << Rails.root.join("app", "jobs")
+
+    config.active_record.schema_format = :sql
   end
 end
