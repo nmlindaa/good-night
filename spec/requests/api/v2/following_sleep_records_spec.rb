@@ -5,6 +5,7 @@ RSpec.describe Api::V2::FollowingSleepRecordsController, type: :controller do
     let(:user) { create(:user) }
     let(:followed_user1) { create(:user) }
     let(:followed_user2) { create(:user) }
+    let(:followed_user3) { create(:user) }
 
     before do
       create(:follow, follower: user, followed: followed_user1)
@@ -23,8 +24,13 @@ RSpec.describe Api::V2::FollowingSleepRecordsController, type: :controller do
           bed_time: 2.days.ago.beginning_of_day + 22.hours,
           wake_time: 1.days.ago.beginning_of_day + 6.hours
         )
+      create(:sleep_record,
+          user: followed_user3,
+          bed_time: 2.days.ago.beginning_of_day + 22.hours,
+          wake_time: 1.days.ago.beginning_of_day + 6.hours
+        )
 
-      WeeklySleepRecordsSummary.refresh
+      WeeklySleepRecords.refresh
     end
 
     it "returns a successful response" do
@@ -58,6 +64,37 @@ RSpec.describe Api::V2::FollowingSleepRecordsController, type: :controller do
       get :index, params: { user_id: user.id }
       json_response = JSON.parse(response.body)
       expect(json_response["sleep_records"].length).to eq(3)
+    end
+
+    context "when there are recent unfollow changes" do
+      before do
+        Follow.unfollow(user.id, followed_user2.id)
+      end
+
+      it "show result excluding recent unfollows" do
+        get :index, params: { user_id: user.id, per_page: 5 }
+        json_response = JSON.parse(response.body)
+        expect(json_response["sleep_records"].length).to eq(2)
+
+        user_ids = json_response["sleep_records"].map { |record| record["user_id"] }
+        expect(user_ids).to include(followed_user1.id)
+        expect(user_ids).not_to include(followed_user2.id)
+      end
+    end
+
+    context "when there are recent follow changes" do
+      before do
+        Follow.follow(user.id, followed_user3.id)
+      end
+
+      it "show recent follow sleep records" do
+        get :index, params: { user_id: user.id, per_page: 5 }
+        json_response = JSON.parse(response.body)
+
+        expect(json_response["sleep_records"].length).to eq(4)
+        user_ids = json_response["sleep_records"].map { |record| record["user_id"] }
+        expect(user_ids).to include(followed_user1.id, followed_user2.id, followed_user3.id)
+      end
     end
   end
 end
