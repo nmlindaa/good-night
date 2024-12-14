@@ -3,12 +3,6 @@ require 'rails_helper'
 RSpec.describe Api::V1::SleepRecordsController, type: :controller do
   let(:user) { create(:user) }
 
-  before do
-    allow(controller).to receive(:set_user) do
-      controller.instance_variable_set(:@user, user)
-    end
-  end
-
   describe "GET #index" do
     it "returns a successful response" do
       get :index, params: { user_id: user.id }
