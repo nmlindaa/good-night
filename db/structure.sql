@@ -90,10 +90,10 @@ CREATE TABLE public.users (
 
 
 --
--- Name: weekly_sleep_records_summary; Type: MATERIALIZED VIEW; Schema: public; Owner: -
+-- Name: weekly_sleep_records; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW public.weekly_sleep_records_summary AS
+CREATE MATERIALIZED VIEW public.weekly_sleep_records AS
  SELECT sr.id,
     sr.user_id,
     f.follower_id,
@@ -101,9 +101,12 @@ CREATE MATERIALIZED VIEW public.weekly_sleep_records_summary AS
     sr.wake_time,
     sr.duration_minutes
    FROM (public.sleep_records sr
-     JOIN public.follows f ON ((sr.user_id = f.followed_id)))
-  WHERE ((sr.bed_time >= (now() - '7 days'::interval)) AND (sr.wake_time IS NOT NULL) AND (f.unfollowed_at IS NULL))
-  ORDER BY sr.duration_minutes DESC
+     LEFT JOIN ( SELECT DISTINCT follows.followed_id,
+            follows.follower_id
+           FROM public.follows
+          WHERE (follows.unfollowed_at IS NULL)) f ON ((sr.user_id = f.followed_id)))
+  WHERE ((sr.bed_time >= (now() - '7 days'::interval)) AND (sr.wake_time IS NOT NULL))
+  ORDER BY sr.duration_minutes DESC, sr.bed_time DESC
   WITH NO DATA;
 
 
@@ -169,10 +172,10 @@ CREATE INDEX index_sleep_records_on_bed_time_and_duration_minutes ON public.slee
 
 
 --
--- Name: index_weekly_sleep_records_summary; Type: INDEX; Schema: public; Owner: -
+-- Name: index_weekly_sleep_records; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX index_weekly_sleep_records_summary ON public.weekly_sleep_records_summary USING btree (follower_id, user_id);
+CREATE INDEX index_weekly_sleep_records ON public.weekly_sleep_records USING btree (follower_id, user_id);
 
 
 --
@@ -206,6 +209,7 @@ ALTER TABLE ONLY public.follows
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20241214182639'),
 ('20241214102649'),
 ('20241214071116'),
 ('20241213184653'),
