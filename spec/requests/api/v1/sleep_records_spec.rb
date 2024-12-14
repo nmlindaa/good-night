@@ -18,8 +18,9 @@ RSpec.describe Api::V1::SleepRecordsController, type: :controller do
         )
       end
 
-      get :index, params: { user_id: user.id, page: 1 }
-      expect(JSON.parse(response.body).size).to eq(10)
+      get :index, params: { user_id: user.id, page: 1, per_page: 10 }
+      expect(JSON.parse(response.body)["sleep_records"].size).to eq(10)
+      expect(JSON.parse(response.body)["total_pages"]).to eq(2)
     end
   end
 

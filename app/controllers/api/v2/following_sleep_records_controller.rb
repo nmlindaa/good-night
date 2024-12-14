@@ -19,7 +19,9 @@ module Api
               wake_time: record.wake_time,
               duration_minutes: record.duration_minutes
             }
-          end
+          end,
+          page: page,
+          total_pages: records.total_pages
         }
       end
     end

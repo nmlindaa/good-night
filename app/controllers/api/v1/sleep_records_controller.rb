@@ -1,17 +1,20 @@
 module Api
   module V1
     class SleepRecordsController < ApplicationController
+      rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
       before_action :set_user
       before_action :set_open_sleep_record, only: :clock_out
 
       # GET /sleep_records
       # Returns all clocked-in times for the current user, ordered by created_at
       def index
+        page = params[:page] || 1
+        per_page = params[:per_page] || 10
         sleep_records = @user.sleep_records
                               .order(created_at: :desc)
-                              .page(params[:page] || 1)
-                              .per(params[:per_page] || 10)
-        render json: sleep_records, meta: { total_pages: sleep_records.total_pages }, status: :ok
+                              .page(page)
+                              .per(per_page)
+        render json: { sleep_records: sleep_records, page: page, total_pages: sleep_records.total_pages }, status: :ok
       end
 
       # POST /sleep_records/clock_in
@@ -51,6 +54,10 @@ module Api
 
       def set_user
         @user = User.find(params[:user_id])
+      end
+
+      def record_not_found(exception)
+        render json: { error: "#{exception.model} not found" }, status: :not_found
       end
     end
   end
