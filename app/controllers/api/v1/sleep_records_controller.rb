@@ -8,11 +8,25 @@ module Api
       def index
         page = (params[:page] || 1).to_i
         per_page = (params[:per_page] || 10).to_i
-        sleep_records = @user.sleep_records
-                              .order(created_at: :desc)
-                              .page(page)
-                              .per(per_page)
-        render json: { sleep_records: sleep_records, page: page, total_pages: sleep_records.total_pages }, status: :ok
+        cache_key = "sleep_records_#{@user.id}_page_#{page}_per_#{per_page}"
+
+        cached_data = Rails.cache.fetch(cache_key, expires_in: 1.minutes) do
+          records = @user.sleep_records
+                          .order(created_at: :desc)
+                          .page(page)
+                          .per(per_page)
+          {
+            sleep_records: records.to_a,
+            total_pages: records.total_pages
+          }
+        end
+
+        render json: {
+          message: "Success",
+          sleep_records: cached_data[:sleep_records],
+          page: page,
+          total_pages: cached_data[:total_pages]
+        }, status: :ok
       end
 
       def clock_in

@@ -6,13 +6,21 @@ module Api
         page = (params[:page] || 1).to_i
         per_page = (params[:per_page] || 10).to_i
 
-        records = fetch_sleep_records(user, page, per_page)
+        cache_key = "following_sleep_records_v2_#{user.id}_page_#{page}_per_#{per_page}"
+
+        cached_data = Rails.cache.fetch(cache_key, expires_in: 1.minutes) do
+          records = fetch_sleep_records(user, page, per_page)
+          {
+            sleep_records: records.to_a,
+            total_pages: records.total_pages
+          }
+        end
 
         render json: {
           message: "Success",
-          sleep_records: serialize_records(records),
+          sleep_records: serialize_records(cached_data[:sleep_records]),
           page: page,
-          total_pages: records.total_pages
+          total_pages: cached_data[:total_pages]
         }
       end
 
