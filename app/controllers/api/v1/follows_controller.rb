@@ -1,23 +1,26 @@
 module Api
   module V1
     class FollowsController < ApplicationController
-      def create
-        follow = Follow.new(follow_params)
-        if follow.save
-          render json: follow, status: :created
+      def follow
+        follow = Follow.follow(follow_params[:follower_id], follow_params[:following_id])
+        if follow.success?
+          render json: { message: "Success" }, status: :ok
         else
-          render json: { errors: follow.errors.full_messages }, status: :unprocessable_entity
+          render json: { errors: follow.errors }, status: :unprocessable_entity
         end
+      rescue ActiveRecord::RecordNotFound => e
+        render json: { errors: [ e.message ] }, status: :not_found
       end
 
-      def destroy
-        follow = Follow.find_by(follow_params)
-        if follow
-          follow.destroy
-          head :no_content
+      def unfollow
+        unfollow = Follow.unfollow(follow_params[:follower_id], follow_params[:following_id])
+        if unfollow.success?
+          render json: { message: "Success" }, status: :ok
         else
-          head :not_found
+          render json: { errors: unfollow.errors }, status: :unprocessable_entity
         end
+      rescue ActiveRecord::RecordNotFound => e
+        render json: { errors: [ e.message ] }, status: :not_found
       end
 
       private

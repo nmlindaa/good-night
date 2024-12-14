@@ -1,54 +1,94 @@
 require "rails_helper"
 
 RSpec.describe Api::V1::FollowsController, type: :controller do
-  describe "POST #create" do
+  describe "POST #follow" do
     let(:follower) { create(:user) }
     let(:followed) { create(:user) }
+    let(:valid_params) { { follow: { follower_id: follower.id, followed_id: followed.id } } }
 
-    context "with valid parameters" do
-      it "creates a new follow relationship" do
-        expect {
-          post :create, params: { follow: { follower_id: follower.id, followed_id: followed.id } }
-        }.to change(Follow, :count).by(1)
+    context "when the follow is successful" do
+      let(:follow_result) { double(success?: true) }
 
-        expect(response).to have_http_status(:created)
-        expect(JSON.parse(response.body)).to include(
-          "follower_id" => follower.id,
-          "followed_id" => followed.id
-        )
+      before do
+        allow(Follow).to receive(:follow).and_return(follow_result)
+      end
+
+      it "returns a success message" do
+        post :follow, params: valid_params
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)).to eq({ "message" => "Success" })
       end
     end
 
-    context "with invalid parameters" do
-      it "does not create a follow relationship" do
-        expect {
-          post :create, params: { follow: { follower_id: nil, followed_id: nil } }
-        }.not_to change(Follow, :count)
+    context "when the follow is unsuccessful" do
+      let(:follow_result) { double(success?: false, errors: [ "Error message" ]) }
 
+      before do
+        allow(Follow).to receive(:follow).and_return(follow_result)
+      end
+
+      it "returns error messages" do
+        post :follow, params: valid_params
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)).to have_key("errors")
+        expect(JSON.parse(response.body)).to eq({ "errors" => [ "Error message" ] })
+      end
+    end
+
+    context "when a user is not found" do
+      before do
+        allow(Follow).to receive(:follow).and_raise(ActiveRecord::RecordNotFound.new("User not found"))
+      end
+
+      it "returns a not found status" do
+        post :follow, params: valid_params
+        expect(response).to have_http_status(:not_found)
+        expect(JSON.parse(response.body)).to eq({ "errors" => [ "User not found" ] })
       end
     end
   end
 
-  describe "DELETE #destroy" do
-    let!(:follow) { create(:follow) }
+  describe "PATCH #unfollow" do
+    let(:follower) { create(:user) }
+    let(:followed) { create(:user) }
+    let(:valid_params) { { follow: { follower_id: follower.id, followed_id: followed.id } } }
 
-    context "when the follow relationship exists" do
-      it "destroys the follow relationship" do
-        expect {
-          delete :destroy, params: { follow: { follower_id: follow.follower_id, followed_id: follow.followed_id } }
-        }.to change(Follow, :count).by(-1)
+    context "when the unfollow is successful" do
+      let(:unfollow_result) { double(success?: true) }
 
-        expect(response).to have_http_status(:no_content)
+      before do
+        allow(Follow).to receive(:unfollow).and_return(unfollow_result)
+      end
+
+      it "returns a success message" do
+        post :unfollow, params: valid_params
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)).to eq({ "message" => "Success" })
       end
     end
 
-    context "when the follow relationship does not exist" do
-      it "returns not found status" do
-        delete :destroy, params: { follow: { follower_id: 999, followed_id: 1000 } }
+    context "when the unfollow is unsuccessful" do
+      let(:unfollow_result) { double(success?: false, errors: [ "Error message" ]) }
 
+      before do
+        allow(Follow).to receive(:unfollow).and_return(unfollow_result)
+      end
+
+      it "returns error messages" do
+        post :unfollow, params: valid_params
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(JSON.parse(response.body)).to eq({ "errors" => [ "Error message" ] })
+      end
+    end
+
+    context "when a user is not found" do
+      before do
+        allow(Follow).to receive(:unfollow).and_raise(ActiveRecord::RecordNotFound.new("User not found"))
+      end
+
+      it "returns a not found status" do
+        post :unfollow, params: valid_params
         expect(response).to have_http_status(:not_found)
+        expect(JSON.parse(response.body)).to eq({ "errors" => [ "User not found" ] })
       end
     end
   end

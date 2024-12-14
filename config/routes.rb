@@ -14,14 +14,14 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      post "follows", to: "follows#create"
-      delete "follows", to: "follows#destroy"
+      post "follows", to: "follows#follow"
+      patch "follows", to: "follows#unfollow"
 
       resources :users, only: [] do
         resources :sleep_records, only: [ :index ] do
           collection do
             post :clock_in
-            put :clock_out
+            patch :clock_out
           end
         end
         resources :following_sleep_records, only: [ :index ], controller: "following_sleep_records"
