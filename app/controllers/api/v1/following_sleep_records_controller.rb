@@ -6,7 +6,7 @@ module Api
         user = User.find_by(id: params[:user_id])
         return render json: { error: "User not found" }, status: :not_found unless user
 
-        records = SleepRecord.where(user_id: user.following_ids)
+        records = SleepRecord.where(user_id: user.active_followings.map(&:followed_id))
                              .where("bed_time >= ?", 1.week.ago)
                              .closed
                              .order(duration_minutes: :desc)
