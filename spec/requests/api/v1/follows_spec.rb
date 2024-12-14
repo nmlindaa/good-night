@@ -16,7 +16,7 @@ RSpec.describe Api::V1::FollowsController, type: :controller do
       it "returns a success message" do
         post :follow, params: valid_params
         expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)).to eq({ "message" => "Success" })
+        expect(JSON.parse(response.body)).to eq({ "message" => "Successfully followed user" })
       end
     end
 
@@ -62,7 +62,7 @@ RSpec.describe Api::V1::FollowsController, type: :controller do
       it "returns a success message" do
         post :unfollow, params: valid_params
         expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)).to eq({ "message" => "Success" })
+        expect(JSON.parse(response.body)).to eq({ "message" => "Successfully unfollowed user" })
       end
     end
 
