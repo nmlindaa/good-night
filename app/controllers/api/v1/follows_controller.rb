@@ -3,7 +3,7 @@ module Api
     class FollowsController < ApplicationController
       def follow
         follow = Follow.follow(follow_params[:follower_id], follow_params[:followed_id])
-        if follow.success?
+        if follow.persisted?
           render json: { message: "Success" }, status: :ok
         else
           render json: { errors: follow.errors }, status: :unprocessable_entity
@@ -14,7 +14,7 @@ module Api
 
       def unfollow
         unfollow = Follow.unfollow(follow_params[:follower_id], follow_params[:followed_id])
-        if unfollow.success?
+        if unfollow.persisted?
           render json: { message: "Success" }, status: :ok
         else
           render json: { errors: unfollow.errors }, status: :unprocessable_entity

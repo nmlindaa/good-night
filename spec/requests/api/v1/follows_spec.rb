@@ -7,7 +7,7 @@ RSpec.describe Api::V1::FollowsController, type: :controller do
     let(:valid_params) { { follow: { follower_id: follower.id, followed_id: followed.id } } }
 
     context "when the follow is successful" do
-      let(:follow_result) { double(success?: true) }
+      let(:follow_result) { double(persisted?: true) }
 
       before do
         allow(Follow).to receive(:follow).and_return(follow_result)
@@ -21,7 +21,7 @@ RSpec.describe Api::V1::FollowsController, type: :controller do
     end
 
     context "when the follow is unsuccessful" do
-      let(:follow_result) { double(success?: false, errors: [ "Error message" ]) }
+      let(:follow_result) { double(persisted?: false, errors: [ "Error message" ]) }
 
       before do
         allow(Follow).to receive(:follow).and_return(follow_result)
@@ -53,7 +53,7 @@ RSpec.describe Api::V1::FollowsController, type: :controller do
     let(:valid_params) { { follow: { follower_id: follower.id, followed_id: followed.id } } }
 
     context "when the unfollow is successful" do
-      let(:unfollow_result) { double(success?: true) }
+      let(:unfollow_result) { double(persisted?: true) }
 
       before do
         allow(Follow).to receive(:unfollow).and_return(unfollow_result)
@@ -67,7 +67,7 @@ RSpec.describe Api::V1::FollowsController, type: :controller do
     end
 
     context "when the unfollow is unsuccessful" do
-      let(:unfollow_result) { double(success?: false, errors: [ "Error message" ]) }
+      let(:unfollow_result) { double(persisted?: false, errors: [ "Error message" ]) }
 
       before do
         allow(Follow).to receive(:unfollow).and_return(unfollow_result)
