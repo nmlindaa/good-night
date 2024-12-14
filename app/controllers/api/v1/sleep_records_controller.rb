@@ -5,11 +5,9 @@ module Api
       before_action :set_user
       before_action :set_open_sleep_record, only: :clock_out
 
-      # GET /sleep_records
-      # Returns all clocked-in times for the current user, ordered by created_at
       def index
-        page = params[:page] || 1
-        per_page = params[:per_page] || 10
+        page = (params[:page] || 1).to_i
+        per_page = (params[:per_page] || 10).to_i
         sleep_records = @user.sleep_records
                               .order(created_at: :desc)
                               .page(page)
@@ -17,8 +15,6 @@ module Api
         render json: { sleep_records: sleep_records, page: page, total_pages: sleep_records.total_pages }, status: :ok
       end
 
-      # POST /sleep_records/clock_in
-      # Logs bed time for the current user
       def clock_in
         if @user.sleep_records.where(wake_time: nil).exists?
           render json: { error: "You're already clocked in." }, status: :unprocessable_entity
@@ -33,8 +29,6 @@ module Api
         end
       end
 
-      # PUT /sleep_records/clock_out
-      # Logs wake time for the current user
       def clock_out
         if @open_sleep_record.update(wake_time: Time.zone.now)
           render json: { message: "Successfully clocked out", sleep_record: @open_sleep_record }, status: :ok
