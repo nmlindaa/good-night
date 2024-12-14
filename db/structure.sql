@@ -102,7 +102,7 @@ CREATE MATERIALIZED VIEW public.weekly_sleep_records_summary AS
     sr.duration_minutes
    FROM (public.sleep_records sr
      JOIN public.follows f ON ((sr.user_id = f.followed_id)))
-  WHERE ((sr.bed_time >= (now() - '7 days'::interval)) AND (sr.wake_time IS NOT NULL))
+  WHERE ((sr.bed_time >= (now() - '7 days'::interval)) AND (sr.wake_time IS NOT NULL) AND (f.unfollowed_at IS NULL))
   ORDER BY sr.duration_minutes DESC
   WITH NO DATA;
 
@@ -206,6 +206,7 @@ ALTER TABLE ONLY public.follows
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20241214102649'),
 ('20241214071116'),
 ('20241213184653'),
 ('20241212184714'),
